@@ -193,9 +193,11 @@ tool.Equipped:Connect(function(mouse)
     end
 end)
 
--- Desequipar tool (sem resetar personagem e sem equipar itens)
+-- Desequipar tool → equipa só o item 12866137394
 tool.Unequipped:Connect(function()
-    createNotification("⚔️ sword goner Guardado", "Tool desequipado!")
+    local args = {12866137394}
+    game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Wear"):InvokeServer(unpack(args))
+    createNotification("⚔️ sword goner Guardado", "Tool desequipado! Visual restaurado.")
 end)
 
 -- Limpeza quando player sai
