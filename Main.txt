@@ -193,14 +193,9 @@ tool.Equipped:Connect(function(mouse)
     end
 end)
 
--- Desequipar tool (sem resetar personagem)
+-- Desequipar tool (sem resetar personagem e sem equipar itens)
 tool.Unequipped:Connect(function()
-    createNotification("⚔️ sword goner Guardado", "Tool desequipado! Equipando itens em 2s...")
-
-    -- Equipar itens automaticamente após 2 segundos
-    task.delay(2, function()
-        equipItems(itemIDs)
-    end)
+    createNotification("⚔️ sword goner Guardado", "Tool desequipado!")
 end)
 
 -- Limpeza quando player sai
