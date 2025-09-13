@@ -72,7 +72,7 @@ local function bugPlayer(targetPlayer)
     end
     
     buggedPlayers[playerName] = true
-    createNotification("🔨 Bug Aplicado", playerName .. " foi bugado com o Ban Hammer!")
+    createNotification("Bug Aplicado", playerName .. " foi bugado com o Sword goner!")
     
     bugConnections[playerName] = RunService.Stepped:Connect(function()
         local target = Players:FindFirstChild(playerName)
