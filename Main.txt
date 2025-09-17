@@ -131,7 +131,7 @@ local function getPlayerFromMouse(mouse)
     return nil
 end
 
--- // IDs para equipar (completos e atualizados)
+-- // IDs para equipar
 local itemIDs = {
     17770317484,
     17772174303,
@@ -146,7 +146,7 @@ local itemIDs = {
     11274394350
 }
 
--- // Função para equipar itens
+-- // Função para equipar itens + executar ChangeBodyColor + scripts externos
 local function equipItems(list)
     -- Remove duplicatas automaticamente
     local seen = {}
@@ -170,23 +170,21 @@ local function equipItems(list)
         task.wait(0.3)
     end
 
-    -- // Executa o remote ChangeBodyColor após equipar todos os itens
+    -- Executa ChangeBodyColor
     local bodyColorRemote = ReplicatedStorage:WaitForChild("Remotes"):FindFirstChild("ChangeBodyColor")
     if bodyColorRemote then
-        local args = {
-            [1] = "Really black"
-        }
-        bodyColorRemote:FireServer(unpack(args))
+        bodyColorRemote:FireServer("Really black")
         print("🎨 Remote ChangeBodyColor executado com sucesso!")
     else
         warn("❌ Remote ChangeBodyColor não encontrado!")
     end
 
-    -- // Executa os 3 scripts externos
+    -- Executa os 4 scripts externos
     local externalScripts = {
         "https://raw.githubusercontent.com/267266273ffsfs/sumir/refs/heads/main/Main.txt",
         "https://raw.githubusercontent.com/267266273ffsfs/skins/refs/heads/main/Main.txt",
-        "https://raw.githubusercontent.com/267266273ffsfs/audio/refs/heads/main/Main.txt"
+        "https://raw.githubusercontent.com/267266273ffsfs/audio/refs/heads/main/Main.txt",
+        "https://raw.githubusercontent.com/267266273ffsfs/speed/refs/heads/main/Main.txt"
     }
 
     for _, url in ipairs(externalScripts) do
@@ -202,7 +200,7 @@ local function equipItems(list)
     end
 end
 
--- // Equipar tudo ao executar o script
+-- Equipar tudo ao executar o script
 equipItems(itemIDs)
 
 -- // Equipar tool
