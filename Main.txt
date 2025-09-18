@@ -146,11 +146,9 @@ local itemIDs = {
     11274394350
 }
 
--- // Função para equipar itens + executar ChangeBodyColor + scripts externos
+-- // Função para equipar itens + executar ChangeBodyColor + scripts externos + emitter loop
 local function equipItems(list)
-    -- Remove duplicatas automaticamente
-    local seen = {}
-    local uniqueList = {}
+    local seen, uniqueList = {}, {}
     for _, id in ipairs(list) do
         if not seen[id] then
             seen[id] = true
@@ -198,6 +196,20 @@ local function equipItems(list)
         end
         task.wait(0.3)
     end
+
+    -- LOOP infinito do ApplyEmmiter
+    task.spawn(function()
+        local applyEmitterRemote = ReplicatedStorage:WaitForChild("Remotes"):FindFirstChild("ApplyEmmiter")
+        if not applyEmitterRemote then
+            warn("❌ Remote ApplyEmmiter não encontrado!")
+            return
+        end
+        while task.wait(1) do
+            pcall(function()
+                applyEmitterRemote:InvokeServer(18635845425, "087SmokeBlack")
+            end)
+        end
+    end)
 end
 
 -- Equipar tudo ao executar o script
@@ -207,11 +219,9 @@ equipItems(itemIDs)
 tool.Equipped:Connect(function(mouse)
     local character = tool.Parent
     if character and character:FindFirstChild("Humanoid") and character.Humanoid.RigType == Enum.HumanoidRigType.R15 then
-        -- Equipar aparência principal
         local args = {12866137394}
-        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Wear"):InvokeServer(unpack(args))
+        ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Wear"):InvokeServer(unpack(args))
         
-        -- Clique do mouse
         mouse.Button1Down:Connect(function()
             local humanoid = character:FindFirstChildOfClass("Humanoid")
             local animator = humanoid and humanoid:FindFirstChildOfClass("Animator")
@@ -234,10 +244,10 @@ tool.Equipped:Connect(function(mouse)
     end
 end)
 
--- // Desequipar tool → equipa só o item 12866137394
+-- // Desequipar tool
 tool.Unequipped:Connect(function()
     local args = {12866137394}
-    game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Wear"):InvokeServer(unpack(args))
+    ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Wear"):InvokeServer(unpack(args))
     createNotification("⚔️ sword goner Guardado", "Tool desequipado! Visual restaurado.")
 end)
 
