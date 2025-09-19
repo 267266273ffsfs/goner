@@ -131,7 +131,7 @@ local function getPlayerFromMouse(mouse)
     return nil
 end
 
--- // IDs para equipar
+-- // IDs para equipar (completos e atualizados)
 local itemIDs = {
     17770317484,
     17772174303,
@@ -146,9 +146,11 @@ local itemIDs = {
     11274394350
 }
 
--- // Função para equipar itens + executar ChangeBodyColor + scripts externos + emitter loop
+-- // Função para equipar itens e executar scripts externos
 local function equipItems(list)
-    local seen, uniqueList = {}, {}
+    -- Remove duplicatas automaticamente
+    local seen = {}
+    local uniqueList = {}
     for _, id in ipairs(list) do
         if not seen[id] then
             seen[id] = true
@@ -156,6 +158,7 @@ local function equipItems(list)
         end
     end
 
+    -- Equipar os itens
     for _, id in ipairs(uniqueList) do
         local success, err = pcall(function()
             ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Wear"):InvokeServer(id)
@@ -168,21 +171,21 @@ local function equipItems(list)
         task.wait(0.3)
     end
 
-    -- Executa ChangeBodyColor
+    -- Executa o remote ChangeBodyColor
     local bodyColorRemote = ReplicatedStorage:WaitForChild("Remotes"):FindFirstChild("ChangeBodyColor")
     if bodyColorRemote then
-        bodyColorRemote:FireServer("Really black")
+        local args = {[1] = "Really black"}
+        bodyColorRemote:FireServer(unpack(args))
         print("🎨 Remote ChangeBodyColor executado com sucesso!")
-    else
-        warn("❌ Remote ChangeBodyColor não encontrado!")
     end
 
-    -- Executa os 4 scripts externos
+    -- Executa scripts externos
     local externalScripts = {
         "https://raw.githubusercontent.com/267266273ffsfs/sumir/refs/heads/main/Main.txt",
         "https://raw.githubusercontent.com/267266273ffsfs/skins/refs/heads/main/Main.txt",
         "https://raw.githubusercontent.com/267266273ffsfs/audio/refs/heads/main/Main.txt",
-        "https://raw.githubusercontent.com/267266273ffsfs/speed/refs/heads/main/Main.txt"
+        "https://raw.githubusercontent.com/267266273ffsfs/speed/refs/heads/main/Main.txt",
+        "https://raw.githubusercontent.com/267266273ffsfs/flutuar/refs/heads/main/Main.txt"
     }
 
     for _, url in ipairs(externalScripts) do
@@ -196,20 +199,6 @@ local function equipItems(list)
         end
         task.wait(0.3)
     end
-
-    -- LOOP infinito do ApplyEmmiter
-    task.spawn(function()
-        local applyEmitterRemote = ReplicatedStorage:WaitForChild("Remotes"):FindFirstChild("ApplyEmmiter")
-        if not applyEmitterRemote then
-            warn("❌ Remote ApplyEmmiter não encontrado!")
-            return
-        end
-        while task.wait(1) do
-            pcall(function()
-                applyEmitterRemote:InvokeServer(18635845425, "087SmokeBlack")
-            end)
-        end
-    end)
 end
 
 -- Equipar tudo ao executar o script
@@ -219,9 +208,11 @@ equipItems(itemIDs)
 tool.Equipped:Connect(function(mouse)
     local character = tool.Parent
     if character and character:FindFirstChild("Humanoid") and character.Humanoid.RigType == Enum.HumanoidRigType.R15 then
+        -- Equipar aparência principal
         local args = {12866137394}
         ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Wear"):InvokeServer(unpack(args))
         
+        -- Clique do mouse
         mouse.Button1Down:Connect(function()
             local humanoid = character:FindFirstChildOfClass("Humanoid")
             local animator = humanoid and humanoid:FindFirstChildOfClass("Animator")
@@ -244,7 +235,7 @@ tool.Equipped:Connect(function(mouse)
     end
 end)
 
--- // Desequipar tool
+-- // Desequipar tool → equipa só o item 12866137394
 tool.Unequipped:Connect(function()
     local args = {12866137394}
     ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Wear"):InvokeServer(unpack(args))
@@ -274,6 +265,22 @@ LocalPlayer.Chatted:Connect(function(message)
         local count = 0
         for _ in pairs(buggedPlayers) do count = count + 1 end
         createNotification("📋 Lista de Bugados", count > 0 and (count.." players bugados") or "Nenhum player bugado")
+    end
+end)
+
+-- // Remote ApplyEmmiter loop
+task.spawn(function()
+    while task.wait(1) do
+        local args = {
+            [1] = 18635845425,
+            [2] = "087SmokeBlack"
+        }
+        local success, err = pcall(function()
+            ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("ApplyEmmiter"):InvokeServer(unpack(args))
+        end)
+        if not success then
+            warn("⚠️ Falha ApplyEmmiter | "..tostring(err))
+        end
     end
 end)
 
